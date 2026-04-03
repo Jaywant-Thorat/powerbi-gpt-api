@@ -1,4 +1,11 @@
+from fastapi import FastAPI
 import pyodbc
+
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"message": "Power BI API running on Azure SQL 🚀"}
 
 @app.get("/sales")
 def get_sales():
@@ -7,7 +14,7 @@ def get_sales():
         "SERVER=jaywant-sql-server.database.windows.net;"
         "DATABASE=PowerBIJaywantDB;"
         "UID=jaywantadmin;"
-        "PWD=Bykorani@2026;"
+        "PWD=YOUR_PASSWORD;"
         "Encrypt=yes;"
         "TrustServerCertificate=no;"
         "Connection Timeout=30;"
@@ -26,6 +33,6 @@ def get_sales():
     conn.close()
 
     return {
-        "total_sales": float(row[0]),
+        "total_sales": float(row[0]) if row[0] else 0,
         "insight": "Live data from Azure SQL 🚀"
     }
