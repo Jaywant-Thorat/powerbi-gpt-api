@@ -39,4 +39,7 @@ def get_sales(region: str = None, min_sales: float = 0):
         }
 
     except Exception as e:
-        return {"error": str(e)}
+        return {
+            "error": str(e),
+            "type": "debug"
+        }
