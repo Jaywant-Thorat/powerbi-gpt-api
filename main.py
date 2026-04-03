@@ -1,18 +1,31 @@
-from fastapi import FastAPI
-import os
-
-app = FastAPI()
-
-port = int(os.environ.get("PORT", 8000))
-
-@app.get("/")
-def home():
-    return {"message": "Welcome to Power BI with Jaywant API 🚀"}
+import pyodbc
 
 @app.get("/sales")
 def get_sales():
+    conn = pyodbc.connect(
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        "SERVER=jaywant-sql-server.database.windows.net;"
+        "DATABASE=PowerBIJaywantDB;"
+        "UID=jaywantadmin;"
+        "PWD=Bykorani@2026;"
+        "Encrypt=yes;"
+        "TrustServerCertificate=no;"
+        "Connection Timeout=30;"
+    )
+
+    cursor = conn.cursor()
+
+    query = """
+    SELECT SUM(TotalDue) AS total_sales
+    FROM Sales.SalesOrderHeader
+    """
+
+    cursor.execute(query)
+    row = cursor.fetchone()
+
+    conn.close()
+
     return {
-        "total_sales": 100000,
-        "region": "Bharat",
-        "insight": "Sales are growing steadily"
+        "total_sales": float(row[0]),
+        "insight": "Live data from Azure SQL 🚀"
     }
