@@ -5,38 +5,38 @@ app = FastAPI()
 
 @app.get("/sales")
 def get_sales(region: str = None, min_sales: float = 0):
-    conn = pyodbc.connect(
-        "DRIVER={ODBC Driver 17 for SQL Server};"
-        "SERVER=jaywant-sql-server.database.windows.net;"
-        "DATABASE=PowerBIJaywantDB;"
-        "UID=jaywantadmin;"
-        "PWD=Bykorani@2026;"
-        "Encrypt=yes;"
-        "TrustServerCertificate=no;"
-    )
+    try:
+        conn = pyodbc.connect(
+            "DRIVER={ODBC Driver 17 for SQL Server};"
+            "SERVER=jaywant-sql-server.database.windows.net;"
+            "DATABASE=PowerBIJaywantDB;"
+            "UID=jaywantadmin;"
+            "PWD=Bykorani@2026;"
+            "Encrypt=yes;"
+            "TrustServerCertificate=no;"
+        )
 
-    cursor = conn.cursor()
+        cursor = conn.cursor()
 
-    query = "SELECT SUM(total_sales) FROM SalesData WHERE 1=1"
-    params = []
+        query = "SELECT SUM(total_sales) FROM SalesData WHERE 1=1"
+        params = []
 
-    if region:
-        query += " AND region = ?"
-        params.append(region)
+        if region:
+            query += " AND region = ?"
+            params.append(region)
 
-    if min_sales > 0:
-        query += " AND total_sales >= ?"
-        params.append(min_sales)
+        if min_sales > 0:
+            query += " AND total_sales >= ?"
+            params.append(min_sales)
 
-    cursor.execute(query, params)
-    row = cursor.fetchone()
+        cursor.execute(query, params)
+        row = cursor.fetchone()
 
-    conn.close()
+        conn.close()
 
-    return {
-        "filters": {
-            "region": region,
-            "min_sales": min_sales
-        },
-        "total_sales": float(row[0]) if row[0] else 0
-    }
+        return {
+            "total_sales": float(row[0]) if row[0] else 0
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
