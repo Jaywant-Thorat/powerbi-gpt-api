@@ -1,38 +1,42 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 import pyodbc
 
 app = FastAPI()
 
-@app.get("/")
-def home():
-    return {"message": "Power BI API running on Azure SQL 🚀"}
-
 @app.get("/sales")
-def get_sales():
+def get_sales(region: str = None, min_sales: float = 0):
     conn = pyodbc.connect(
         "DRIVER={ODBC Driver 17 for SQL Server};"
         "SERVER=jaywant-sql-server.database.windows.net;"
         "DATABASE=PowerBIJaywantDB;"
         "UID=jaywantadmin;"
-        "PWD=Bykorani@2026;"
+        "PWD=YOUR_PASSWORD;"
         "Encrypt=yes;"
         "TrustServerCertificate=no;"
-        "Connection Timeout=30;"
     )
 
     cursor = conn.cursor()
 
-    query = """
-    SELECT SUM(TotalDue) AS total_sales
-    FROM Sales.SalesOrderHeader
-    """
+    query = "SELECT SUM(total_sales) FROM SalesData WHERE 1=1"
+    params = []
 
-    cursor.execute(query)
+    if region:
+        query += " AND region = ?"
+        params.append(region)
+
+    if min_sales > 0:
+        query += " AND total_sales >= ?"
+        params.append(min_sales)
+
+    cursor.execute(query, params)
     row = cursor.fetchone()
 
     conn.close()
 
     return {
-        "total_sales": float(row[0]) if row[0] else 0,
-        "insight": "Live data from Azure SQL 🚀"
+        "filters": {
+            "region": region,
+            "min_sales": min_sales
+        },
+        "total_sales": float(row[0]) if row[0] else 0
     }
