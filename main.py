@@ -7,13 +7,13 @@ app = FastAPI()
 def get_sales(region: str = None, min_sales: float = 0):
     try:
         conn = pyodbc.connect(
-            "DRIVER={ODBC Driver 17 for SQL Server};"
+            "DRIVER={ODBC Driver 18 for SQL Server};"
             "SERVER=jaywant-sql-server.database.windows.net;"
             "DATABASE=PowerBIJaywantDB;"
             "UID=jaywantadmin;"
             "PWD=Bykorani@2026;"
             "Encrypt=yes;"
-            "TrustServerCertificate=no;"
+            "TrustServerCertificate=yes;"
         )
 
         cursor = conn.cursor()
