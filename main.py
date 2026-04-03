@@ -10,7 +10,7 @@ def get_sales(region: str = None, min_sales: float = 0):
         "SERVER=jaywant-sql-server.database.windows.net;"
         "DATABASE=PowerBIJaywantDB;"
         "UID=jaywantadmin;"
-        "PWD=YOUR_PASSWORD;"
+        "PWD=Bykorani@2026;"
         "Encrypt=yes;"
         "TrustServerCertificate=no;"
     )
