@@ -14,7 +14,7 @@ def get_sales():
         "SERVER=jaywant-sql-server.database.windows.net;"
         "DATABASE=PowerBIJaywantDB;"
         "UID=jaywantadmin;"
-        "PWD=YOUR_PASSWORD;"
+        "PWD=Bykorani@2026;"
         "Encrypt=yes;"
         "TrustServerCertificate=no;"
         "Connection Timeout=30;"
