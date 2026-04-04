@@ -3,43 +3,85 @@ import pyodbc
 
 app = FastAPI()
 
+
+# 🔌 DATABASE CONNECTION FUNCTION
+def get_connection():
+    return pyodbc.connect(
+        "DRIVER={ODBC Driver 18 for SQL Server};"
+        "SERVER=jaywant-sql-server.database.windows.net;"
+        "DATABASE=PowerBIJaywantDB;"
+        "UID=jaywantadmin;"
+        "PWD=Bykorani@2026;"
+        "Encrypt=yes;"
+        "TrustServerCertificate=yes;"
+    )
+
+
+# ✅ BASIC SALES API (STATIC)
 @app.get("/sales")
-def get_sales(region: str = None, min_sales: float = 0):
-    try:
-        conn = pyodbc.connect(
-            "DRIVER={ODBC Driver 18 for SQL Server};"
-            "SERVER=jaywant-sql-server.database.windows.net;"
-            "DATABASE=PowerBIJaywantDB;"
-            "UID=jaywantadmin;"
-            "PWD=Bykorani@2026;"
-            "Encrypt=yes;"
-            "TrustServerCertificate=yes;"
-        )
+def get_sales_data(
+    region: str = Query(None),
+    min_sales: float = Query(None)
+):
+    conn = get_connection()
+    cursor = conn.cursor()
 
-        cursor = conn.cursor()
+    query = "SELECT SUM(SalesAmount) FROM Sales WHERE 1=1"
+    params = []
 
-        query = "SELECT SUM(total_sales) FROM SalesData WHERE 1=1"
-        params = []
+    if region:
+        query += " AND Region = ?"
+        params.append(region)
 
-        if region:
-            query += " AND region = ?"
-            params.append(region)
+    if min_sales:
+        query += " AND SalesAmount >= ?"
+        params.append(min_sales)
 
-        if min_sales > 0:
-            query += " AND total_sales >= ?"
-            params.append(min_sales)
+    cursor.execute(query, params)
+    result = cursor.fetchone()[0]
 
-        cursor.execute(query, params)
-        row = cursor.fetchone()
+    conn.close()
 
-        conn.close()
+    return {
+        "total_sales": result
+    }
 
-        return {
-            "total_sales": float(row[0]) if row[0] else 0
-        }
 
-    except Exception as e:
-        return {
-            "error": str(e),
-            "type": "debug"
-        }
+# 🚀 DYNAMIC SALES API (NEXT LEVEL)
+@app.get("/dynamic-sales")
+def dynamic_sales(
+    region: str = Query(None),
+    min_sales: float = Query(None)
+):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = "SELECT SUM(SalesAmount) FROM Sales WHERE 1=1"
+    params = []
+
+    if region:
+        query += " AND Region = ?"
+        params.append(region)
+
+    if min_sales:
+        query += " AND SalesAmount >= ?"
+        params.append(min_sales)
+
+    cursor.execute(query, params)
+    result = cursor.fetchone()[0]
+
+    conn.close()
+
+    return {
+        "query_used": query,
+        "parameters": params,
+        "total_sales": result
+    }
+
+
+# 🏠 ROOT ENDPOINT (OPTIONAL - avoids 404 confusion)
+@app.get("/")
+def root():
+    return {
+        "message": "Power BI GPT API is running 🚀"
+    }
