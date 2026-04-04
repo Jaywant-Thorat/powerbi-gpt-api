@@ -4,7 +4,7 @@ import pyodbc
 app = FastAPI()
 
 
-# 🔌 DATABASE CONNECTION FUNCTION
+# 🔌 DATABASE CONNECTION
 def get_connection():
     return pyodbc.connect(
         "DRIVER={ODBC Driver 18 for SQL Server};"
@@ -17,7 +17,15 @@ def get_connection():
     )
 
 
-# ✅ BASIC SALES API (STATIC)
+# 🛡️ SAFE RESULT HANDLER
+def safe_fetch(cursor):
+    row = cursor.fetchone()
+    if row and row[0] is not None:
+        return float(row[0])
+    return 0
+
+
+# ✅ BASIC SALES API
 @app.get("/sales")
 def get_sales_data(
     region: str = Query(None),
@@ -38,7 +46,8 @@ def get_sales_data(
         params.append(min_sales)
 
     cursor.execute(query, params)
-    result = cursor.fetchone()[0]
+
+    result = safe_fetch(cursor)
 
     conn.close()
 
@@ -47,7 +56,7 @@ def get_sales_data(
     }
 
 
-# 🚀 DYNAMIC SALES API (NEXT LEVEL)
+# 🚀 DYNAMIC SALES API
 @app.get("/dynamic-sales")
 def dynamic_sales(
     region: str = Query(None),
@@ -68,7 +77,8 @@ def dynamic_sales(
         params.append(min_sales)
 
     cursor.execute(query, params)
-    result = cursor.fetchone()[0]
+
+    result = safe_fetch(cursor)
 
     conn.close()
 
@@ -79,7 +89,7 @@ def dynamic_sales(
     }
 
 
-# 🏠 ROOT ENDPOINT (OPTIONAL - avoids 404 confusion)
+# 🏠 ROOT ENDPOINT (for health check)
 @app.get("/")
 def root():
     return {
